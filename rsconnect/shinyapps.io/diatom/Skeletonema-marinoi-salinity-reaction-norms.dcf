@@ -1,0 +1,12 @@
+name: Skeletonema-marinoi-salinity-reaction-norms
+title: Skeletonema-marinoi-salinity-reaction-norms
+username:
+account: diatom
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 741594
+bundleId: 1911135
+url: https://diatom.shinyapps.io/Skeletonema-marinoi-salinity-reaction-norms/
+when: 1551548667.49473
+asMultiple: FALSE
+asStatic: FALSE
