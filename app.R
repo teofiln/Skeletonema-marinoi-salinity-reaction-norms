@@ -124,6 +124,9 @@ ui <- fluidPage(theme = "flatly",
                   tabPanel("Reaction norms",
                            plotOutput("slope_plot",height = 800) 
                            ),
+                  tabPanel("Summarised reaction norms",
+                           plotOutput("slope_mean_sd",height = 800) 
+                  ),
                   tabPanel("Transfer",
                            column(width = 4,
                                   tags$br(),
@@ -193,14 +196,16 @@ ui <- fluidPage(theme = "flatly",
 server <- function(input, output) {
   ggthemr("grape")
   
-##### --- data tab ------------------------------------------------- #####
+  ##### --- data tab ------------------------------------------------- #####
   output$growth_data <- renderDataTable(
     dd %>% select(-experiment, -plate_number, -rep, -dayn, -treatment) %>% 
       select(plate=plate_name, well, row, column, zone, strain, salinity, replicate, transfer, date, day, mean=Mean, sd=SD, median=Median, sum=Sum),
     options = list(pageLength = 10)
   )
 
+  ##### --- growth curves tab ---------------------------------------- #####
   # one event reactive takes care of both growth curves and reaction norms tab  
+  
   make_plot <- eventReactive( {
     input$plotGrowth
   } , {
@@ -209,7 +214,6 @@ server <- function(input, output) {
       need(length(input$choose_zones) > 0 && length(input$choose_treatments) > 0  , "Eh'nt. Please select a zone and treatment.")
     )
     
-##### --- growth curves tab ---------------------------------------- #####
     n_col <- input$n_facet_cols
     wanted_zones <- input$choose_zones
     wanted_treatments <- input$choose_treatments
@@ -268,7 +272,7 @@ server <- function(input, output) {
   
   output$growth_plot <- renderPlot({make_plot()})
   
-##### --- slopes tab ----------------------------------------------- #####
+  ##### --- slopes tab ----------------------------------------------- #####
   slope_plot <- eventReactive({
     input$plotGrowth }, {
       
@@ -279,10 +283,6 @@ server <- function(input, output) {
       wanted_transfers <- input$choose_transfer
       wanted_facets <- tolower(input$choose_facets)
       
-      slopes_sum <- slopes %>% 
-        group_by(zone, strain, salinity, transfer) %>% 
-        summarise_at("estimate", funs(mean_slope=mean, sd_slope=sd))
-      
       # filter
       slopes_filtered <- slopes %>% 
         filter(zone %in% wanted_zones) %>% 
@@ -292,20 +292,11 @@ server <- function(input, output) {
         mutate(replicate=paste("replicate", replicate)) %>% 
         mutate(transfer=paste("transfer", str_extract(transfer, regex("\\d"))))
       
-      # slopes_sum_filtered <- slopes_sum %>% 
-      #   filter(zone %in% wanted_zones) %>% 
-      #   filter(salinity %in% wanted_treatments) %>% 
-      #   filter(transfer %in% wanted_transfers) %>% 
-      #   mutate(replicate=paste("replicate", replicate)) %>% 
-      #   mutate(transfer=paste("transfer", str_extract(transfer, regex("\\d")))) 
-      
       ss <- ggplot(slopes_filtered, aes(x=salinity, y=estimate, color=salinity, shape=replicate)) +
         geom_hline(aes(yintercept=0), color="red", linetype=2) +
         geom_point(alpha=.8, size=2, stroke=1.5) +
         scale_shape_manual(values=21:23) +
-        # geom_crossbar(data=slopes_sum_filtered, aes(x=salinity, y=mean_slope, ymin=mean_slope-sd_slope, ymax=mean_slope+sd_slope, color=salinity), width=.4, alpha=.4) +
-        # geom_point(data=slopes_sum_filtered, aes(x=salinity, y=mean_slope), pch="X") +
-        # scale_fill_viridis(end = 0.9, discrete = TRUE, option= "B") +
+        scale_fill_viridis(end = 0.9, discrete = TRUE, option= "B") +
         scale_color_viridis(end = 0.9, discrete = TRUE, option= "B") +
         labs(y="Slope of log(RFU) by day", x="Salinity (ppt)")
       
@@ -330,6 +321,74 @@ server <- function(input, output) {
   
   output$slope_plot <- renderPlot({slope_plot()})
 
+  ##### --- slopes mean sd tab --------------------------------------- #####
+  mean_sd_plot <- eventReactive({
+    input$plotGrowth }, {
+    
+      n_col <- input$n_facet_cols
+      wanted_zones <- input$choose_zones
+      wanted_treatments <- input$choose_treatments
+      wanted_replicates <- input$choose_replicates
+      wanted_transfers <- input$choose_transfer
+      wanted_facets <- tolower(input$choose_facets)
+      
+    slopes_filtered <- slopes %>%
+      filter(zone %in% wanted_zones) %>%
+      filter(salinity %in% wanted_treatments) %>%
+      filter(replicate %in% wanted_replicates) %>%
+      filter(transfer %in% wanted_transfers) %>%
+      ungroup %>%
+      mutate(replicate=paste("replicate", replicate)) %>%
+      mutate(transfer=paste("transfer", str_extract(transfer, regex("\\d"))))
+    
+    if (length(wanted_facets) == 1) {
+      slopes_sum <- slopes_filtered %>% 
+        group_by(zone, strain, salinity) %>% 
+        summarise_at("estimate", funs(mean_slope=mean, sd_slope=sd)) 
+    } else {
+      if (wanted_facets[2] == "replicate") {
+        slopes_sum <- slopes_filtered %>% 
+          group_by(zone, strain, salinity, replicate) %>% 
+          summarise_at("estimate", funs(mean_slope=mean, sd_slope=sd))
+      } else if (wanted_facets[2] == "transfer") {
+        slopes_sum <- slopes_filtered %>% 
+          group_by(zone, strain, salinity, transfer) %>% 
+          summarise_at("estimate", funs(mean_slope=mean, sd_slope=sd))
+      } else {
+        slopes_sum <- slopes_filtered %>% 
+          group_by(zone, strain, salinity) %>% 
+          summarise_at("estimate", funs(mean_slope=mean, sd_slope=sd))
+      }
+    }
+    
+    ms <- ggplot(slopes_sum, aes(x=salinity, y=mean_slope, color=salinity)) +
+      geom_hline(aes(yintercept=0), color="red", linetype=2) +
+      geom_point(alpha=.8, size=2, stroke=1.5) +
+      # geom_crossbar(data=slopes_sum_filtered, aes(x=salinity, y=mean_slope, ymin=mean_slope-sd_slope, ymax=mean_slope+sd_slope, color=salinity), width=.4, alpha=.4) +
+      geom_errorbar(data=slopes_sum, aes(x=salinity, y=mean_slope, ymin=mean_slope-sd_slope, ymax=mean_slope+sd_slope, color=salinity), width=.1) +
+      # scale_fill_viridis(end = 0.9, discrete = TRUE, option= "B") +
+      scale_color_viridis(end = 0.9, discrete = TRUE, option= "B") +
+      labs(y="Slope of log(RFU) by day", x="Salinity (ppt)")
+    
+    if (length(wanted_facets) == 1) { 
+      # facets <- as.formula(paste(".~", wanted_facets))
+      facets <- wanted_facets
+    } 
+    
+    if (length(wanted_facets) == 2) {
+      facets <- as.formula(paste(wanted_facets[1], "~", wanted_facets[2]))
+    }
+    
+    ml <- ms + facet_wrap(facets, ncol=n_col)
+    
+    if (input$toggle_free_y_scale) {
+      ml <- ml + facet_wrap(facets, ncol=n_col, scales="free_y")
+    }
+    # ml <- ggplotly(ml)
+    return(ml)
+  })
+  
+  output$slope_mean_sd <- renderPlot({mean_sd_plot()})
 
 ##### --- transfer tab --------------------------------------------- #####
   
