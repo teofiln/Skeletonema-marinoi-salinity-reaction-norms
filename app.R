@@ -12,6 +12,7 @@ library(rdrop2)
 
 source("scripts/make-transfer-in-session.R")
 slopes <- drop_read_csv("Skeletonema-marinoi-salinity-reaction-norms-data/measurements/slopes.csv", stringsAsFactors=FALSE)
+slopes <- mutate(slopes, salinity=factor(salinity, levels=paste(c(8,12,16,20,24,28), "ppt")))
 dd <- drop_read_csv("Skeletonema-marinoi-salinity-reaction-norms-data/measurements/all_data.csv", stringsAsFactors=FALSE)
 dd <- mutate(dd, salinity=factor(paste(treatment, "ppt"), levels=paste(c(8,12,16,20,24,28), "ppt")))
 dd <- mutate(dd, rep=factor(replicate))
