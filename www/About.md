@@ -6,7 +6,7 @@ In this experiment we expose _S. marinoi_ to six salinity treatments ranging fro
 
 We isolated the cultures from single cells from samples originating across the Baltic Sea. The samples have different 'native' salinities, some coming from waters with salinity > 20 ppt while others from areas with salinity as low as 5-6 ppt. The geographic locations of the samples, or Zones as we call them in the app, can be seen in the graphic below. Credit for the map goes to Geoffrey House. The salinity data are from [HELCOM](http://www.helcom.fi/).
 
-![A map of our geographic sampling. Credit: Geoffrey House](www/zone_locations_small.png)
+![A map of our geographic sampling. Credit: Geoffrey House](zone_locations_small.png)
 
 The goal of this experiment is to better understand the variation in salinity reaction norms across the Baltic Sea salinity gradient. A portion of these cultures will also be used for RNASeq experiments to help uncover some of the mechanisms involved in salinity stress response in diatoms. Ultimately, this experiment, combined with genome-scale resequencing data, will help us understand how diatoms colonize freshwaters and how they might respond to changes in ocean salinity at broader scales.
 
@@ -23,4 +23,4 @@ This `R` `Shiny` web application is a tool for [us](http://alversonlab.com/peopl
 
 For related work at our lab, check out these web apps on the [Baltic Sea gradient](https://diatom.shinyapps.io/baltic-sea-gradient-maps/), salinity reaction norms in [Cyclotella](https://diatom.shinyapps.io/Diatoms_and_Salinity/), and [salinity tolerance across a variety of marine and freshwater diatoms](https://diatom.shinyapps.io/diatom-salinity-niche-web/).
 
-This app was written by [Teofil Nakov](https://teofil.discindo.org)
+This app was written by [Teofil Nakov](https://teofil.discindo.org) with input on design and features from Elizabeth Ruck and Kala Downey. Kala also wrote the Help section.

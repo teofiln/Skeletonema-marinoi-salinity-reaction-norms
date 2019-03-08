@@ -182,10 +182,10 @@ ui <- fluidPage(theme = "flatly",
                                     
                                   )
                                   )
+                           ),
+                  tabPanel("Help",
+                           includeMarkdown("www/Usage.md")
                            )
-                  # tabPanel("Help",
-                  #          helpText("")
-                  #          )
                   
                 )
           )
