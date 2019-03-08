@@ -23,4 +23,4 @@ This `R` `Shiny` web application is a tool for [us](http://alversonlab.com/peopl
 
 For related work at our lab, check out these web apps on the [Baltic Sea gradient](https://diatom.shinyapps.io/baltic-sea-gradient-maps/), salinity reaction norms in [Cyclotella](https://diatom.shinyapps.io/Diatoms_and_Salinity/), and [salinity tolerance across a variety of marine and freshwater diatoms](https://diatom.shinyapps.io/diatom-salinity-niche-web/).
 
-This app was written by [Teofil Nakov](https://teofil.discindo.org)
+This app was written by [Teofil Nakov](https://teofil.discindo.org) with input on design and features from Elizabeth Ruck and Kala Downey. Kala also wrote the Help section.
