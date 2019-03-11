@@ -11,10 +11,25 @@ library(ggrepel)
 library(rdrop2)
 
 source("scripts/make-transfer-in-session.R")
+
+# change the paths below to match where your data is stored. for loading from dropbox, the paths should be relative to the dropbox root
 slopes <- drop_read_csv("Skeletonema-marinoi-salinity-reaction-norms-data/measurements/slopes.csv", stringsAsFactors=FALSE)
-slopes <- mutate(slopes, salinity=factor(salinity, levels=paste(c(8,12,16,20,24,28), "ppt")))
 dd <- drop_read_csv("Skeletonema-marinoi-salinity-reaction-norms-data/measurements/all_data.csv", stringsAsFactors=FALSE)
+
+# if running locally (without dropbox), comment the two lines above and uncomment the four lines below. best to use absolute paths
+# source("full/path/to/prepare-data.R")
+# source("full/path/to/calculate-slopes.R")
+# slopes <- read_csv("full/path/to/slopes.csv")
+# dd <- read_csv("full/path/to/all_data.csv")
+
+# set the levels according to your treatments and desired order
+# currently assumes the treatment variable is called `salinity``, 
+# if the treatment column is called something else, modify these two lines appropriately
+# in this case additional changes will be needed in app.R
+slopes <- mutate(slopes, salinity=factor(salinity, levels=paste(c(8,12,16,20,24,28), "ppt")))
 dd <- mutate(dd, salinity=factor(paste(treatment, "ppt"), levels=paste(c(8,12,16,20,24,28), "ppt")))
+
+# to make sure these variables are in the appropriate format
 dd <- mutate(dd, rep=factor(replicate))
 dd <- mutate(dd, dayn=as.numeric(day))
 
@@ -192,7 +207,6 @@ ui <- fluidPage(theme = "flatly",
         )
       )
 
-# Define server logic required to draw a histogram
 server <- function(input, output) {
   ggthemr("grape")
   
