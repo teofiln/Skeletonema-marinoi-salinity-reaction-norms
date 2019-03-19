@@ -25,7 +25,7 @@ dd <- drop_read_csv("Skeletonema-marinoi-salinity-reaction-norms-data/measuremen
 # currently assumes the treatment variable is called `salinity``, 
 # if the treatment column is called something else, modify these two lines appropriately
 # in this case additional changes will be needed in app.R
-slopes <- mutate(slopes, salinity=factor(salinity, levels=paste(c(8,12,16,20,24,28), "ppt")))
+slopes <- mutate(slopes, salinity=factor(treatment, levels=paste(c(8,12,16,20,24,28), "ppt")))
 dd <- mutate(dd, salinity=factor(paste(treatment, "ppt"), levels=paste(c(8,12,16,20,24,28), "ppt")))
 
 # to make sure these variables are in the appropriate format

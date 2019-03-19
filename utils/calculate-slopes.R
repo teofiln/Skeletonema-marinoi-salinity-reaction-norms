@@ -4,7 +4,7 @@ library(broom)
 dd <- get(load("measurements/all_data.Rsave"))
 
 slopes <- dd %>% 
-  group_by(zone, strain, salinity, replicate, transfer) %>% 
+  group_by(zone, strain, treatment, replicate, transfer) %>% 
   mutate(day_per_transfer=row_number()) %>% 
   filter(day_per_transfer %in% 2:6) %>% 
   nest() %>% 
