@@ -57,25 +57,25 @@ FI1_plate <- make_plate(
   strains = FI_keepers
 )
 
-FI1_plate <- FI_plate %>% format_for_append
+FI1_plate <- FI1_plate %>% format_for_append
 
 FI2_plate <- make_plate(
-  plate_name = "fi1",
+  plate_name = "fi2",
   plate_number = 30,
   treatments = c(8, 12, 16, 20, 24, 28),
   strains = FI_keepers
 )
 
-FI2_plate <- FI_plate %>% format_for_append
+FI2_plate <- FI2_plate %>% format_for_append
 
 FI3_plate <- make_plate(
-  plate_name = "fi1",
+  plate_name = "fi3",
   plate_number = 30,
   treatments = c(8, 12, 16, 20, 24, 28),
   strains = FI_keepers
 )
 
-FI3_plate <- FI_plate %>% format_for_append
+FI3_plate <- FI3_plate %>% format_for_append
 
 ##### IMPORTANT ######
 # When a combined plate is made, append its metadata to the main all_plates_meta.csv/Rsave file
@@ -85,8 +85,51 @@ if (FALSE) {
   all_plates_meta <- read_csv("/data/Dropbox/Skeletonema-marinoi-salinity-reaction-norms-data/metadata/all_plates_meta.csv")
   all_plates_meta <- bind_rows(all_plates_meta, FI1_plate, FI2_plate, FI3_plate)
   write_csv(all_plates_meta, path = "/data/Dropbox/Skeletonema-marinoi-salinity-reaction-norms-data/metadata/all_plates_meta.csv")
-  save(all_plates_meta, file = "/data/Dropbox/Skeletonema-marinoi-salinity-reaction-norms-data/metadata/all_plates_meta.csv")
+  save(all_plates_meta, file = "/data/Dropbox/Skeletonema-marinoi-salinity-reaction-norms-data/metadata/all_plates_meta.Rsave")
 }
 
 #####
 
+# 2019-03-20
+# combine J and K
+J_keepers <- paste("J.", c("2.5b", "3.4a", "3.28b", "3.32a"), sep="")
+K_keepers <- paste("K.", c("1.7b", "3.3a", "3.4b",  "3.16a"), sep="")
+JK_keepers <- c(J_keepers, K_keepers)
+
+JK1_plate <- make_plate(
+  plate_name = "jk1",
+  plate_number = 30,
+  treatments = c(8, 12, 16, 20, 24, 28),
+  strains = JK_keepers
+)
+
+JK1_plate <- JK1_plate %>% format_for_append
+
+JK2_plate <- make_plate(
+  plate_name = "jk2",
+  plate_number = 30,
+  treatments = c(8, 12, 16, 20, 24, 28),
+  strains = JK_keepers
+)
+
+JK2_plate <- JK2_plate %>% format_for_append
+
+JK3_plate <- make_plate(
+  plate_name = "jk3",
+  plate_number = 30,
+  treatments = c(8, 12, 16, 20, 24, 28),
+  strains = JK_keepers
+)
+
+JK3_plate <- JK3_plate %>% format_for_append
+
+# See 'important' note above
+
+if (FALSE) {
+  all_plates_meta <- read_csv("/data/Dropbox/Skeletonema-marinoi-salinity-reaction-norms-data/metadata/all_plates_meta.csv")
+  all_plates_meta <- bind_rows(all_plates_meta, JK1_plate, JK2_plate, JK3_plate)
+  write_csv(all_plates_meta, path = "/data/Dropbox/Skeletonema-marinoi-salinity-reaction-norms-data/metadata/all_plates_meta.csv")
+  save(all_plates_meta, file = "/data/Dropbox/Skeletonema-marinoi-salinity-reaction-norms-data/metadata/all_plates_meta.Rsave")
+}
+
+#####
