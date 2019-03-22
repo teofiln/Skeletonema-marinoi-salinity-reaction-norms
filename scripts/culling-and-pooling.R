@@ -133,3 +133,48 @@ if (FALSE) {
 }
 
 #####
+
+
+# 2019-03-22
+# combine P and D
+P_keepers <- paste("P.", c("2.5b", "3.4a", "3.28b", "3.32a"), sep="")
+D_keepers <- paste("D.", c("1.7b", "3.3a", "3.4b",  "3.16a"), sep="")
+PD_keepers <- c(P_keepers, D_keepers)
+
+PD1_plate <- make_plate(
+  plate_name = "pd1",
+  plate_number = 30,
+  treatments = c(8, 12, 16, 20, 24, 28),
+  strains = PD_keepers
+)
+
+PD1_plate <- PD1_plate %>% format_for_append
+
+PD2_plate <- make_plate(
+  plate_name = "pd2",
+  plate_number = 30,
+  treatments = c(8, 12, 16, 20, 24, 28),
+  strains = PD_keepers
+)
+
+PD2_plate <- PD2_plate %>% format_for_append
+
+PD3_plate <- make_plate(
+  plate_name = "pd3",
+  plate_number = 30,
+  treatments = c(8, 12, 16, 20, 24, 28),
+  strains = PD_keepers
+)
+
+PD3_plate <- PD3_plate %>% format_for_append
+
+# See 'important' note above
+
+if (FALSE) {
+  all_plates_meta <- read_csv("/data/Dropbox/Skeletonema-marinoi-salinity-reaction-norms-data/metadata/all_plates_meta.csv")
+  all_plates_meta <- bind_rows(all_plates_meta, PD1_plate, PD2_plate, PD3_plate)
+  write_csv(all_plates_meta, path = "/data/Dropbox/Skeletonema-marinoi-salinity-reaction-norms-data/metadata/all_plates_meta.csv")
+  save(all_plates_meta, file = "/data/Dropbox/Skeletonema-marinoi-salinity-reaction-norms-data/metadata/all_plates_meta.Rsave")
+}
+
+#####
