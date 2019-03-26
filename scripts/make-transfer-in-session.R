@@ -51,7 +51,7 @@ make_transfer <-
              well,
              !!trans_val,
              strain,
-             salinity,
+             treatment,
              replicate) %>%
       mutate(dilution_tmp = !!trans_val / starting_rfu) %>%
       mutate(dilution = ifelse(!!trans_val <= 1.25 * starting_rfu, 1.168, dilution_tmp)) %>%
@@ -65,8 +65,8 @@ make_transfer <-
           culture >= 280 ~ "TS_1000"
         )
       ) %>%
-      mutate(name = paste(strain, salinity, replicate, sep = "|")) %>%
-      mutate(salt = as.numeric(salinity)) %>%
+      mutate(name = paste(strain, treatment, replicate, sep = "|")) %>%
+      mutate(salt = as.numeric(treatment)) %>%
       mutate(V2 = "1", V4 = "1") %>%
       mutate(well2 = well) %>%
       arrange(plate_name, salt)
