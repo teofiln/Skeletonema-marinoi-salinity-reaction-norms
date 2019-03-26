@@ -25,8 +25,8 @@ dd <- drop_read_csv("Skeletonema-marinoi-salinity-reaction-norms-data/measuremen
 # currently assumes the treatment variable is called `salinity``, 
 # if the treatment column is called something else, modify these two lines appropriately
 # in this case additional changes will be needed in app.R
-slopes <- mutate(slopes, salinity=factor(treatment, levels=paste(c(8,12,16,20,24,28), "ppt")))
-dd <- mutate(dd, salinity=factor(paste(treatment, "ppt"), levels=paste(c(8,12,16,20,24,28), "ppt")))
+slopes <- slopes %>% drop_na %>% mutate(treatment=factor(paste(treatment, "ppt"), levels=paste(c(8,12,16,20,24,28), "ppt")))
+dd <- mutate(dd, treatment=factor(paste(treatment, "ppt"), levels=paste(c(8,12,16,20,24,28), "ppt")))
 
 # to make sure these variables are in the appropriate format
 dd <- mutate(dd, rep=factor(replicate))
@@ -57,8 +57,8 @@ ui <- fluidPage(theme = "flatly",
                            checkboxGroupButtons(
                              inputId = "choose_treatments",
                              label = "Treatments:",
-                             choices = as.character(dd$salinity) %>% unique,
-                             selected = as.character(dd$salinity) %>% unique,
+                             choices = as.character(dd$treatment) %>% unique,
+                             selected = as.character(dd$treatment) %>% unique,
                              status="primary", 
                              size="xs",
                              individual = TRUE
@@ -98,7 +98,7 @@ ui <- fluidPage(theme = "flatly",
                            checkboxGroupButtons(
                              inputId = "choose_facets",
                              label = "Facet by:",
-                             choices = c("Strain","Salinity", "Zone", "Transfer", "Replicate"),
+                             choices = c("Strain","Treatment", "Zone", "Transfer", "Replicate"),
                              selected = c("Strain","Replicate"),
                              status="primary", 
                              size="xs",
@@ -212,7 +212,7 @@ server <- function(input, output) {
   ##### --- data tab ------------------------------------------------- #####
   output$growth_data <- renderDataTable(
     dd %>% select(-experiment, -plate_number, -rep, -dayn, -treatment) %>% 
-      select(plate=plate_name, well, row, column, zone, strain, salinity, replicate, transfer, date, day, mean=Mean, sd=SD, median=Median, sum=Sum),
+      select(plate=plate_name, well, row, column, zone, strain, treatment, replicate, transfer, date, day, mean=Mean, sd=SD, median=Median, sum=Sum),
     options = list(pageLength = 10)
   )
 
@@ -237,7 +237,7 @@ server <- function(input, output) {
     
     dd <- dd %>% 
       filter(zone %in% wanted_zones ) %>% 
-      filter(salinity %in% wanted_treatments) %>% 
+      filter(treatment %in% wanted_treatments) %>% 
       filter(replicate %in% wanted_replicates) %>% 
       filter(transfer %in% wanted_transfers) %>% 
       group_by(zone, strain, replicate, transfer) %>% 
@@ -247,11 +247,11 @@ server <- function(input, output) {
       mutate(transfer=paste("transfer", str_extract(transfer, regex("\\d")))) %>% 
       group_by(zone, strain, replicate, transfer)
     
-    pp <- ggplot(data=dd, aes(x=dayn, y=!!wanted_y, colour=salinity)) +
+    pp <- ggplot(data=dd, aes(x=dayn, y=!!wanted_y, colour=treatment)) +
       scale_color_viridis(end = 0.9, discrete = TRUE, option= "B") +
       geom_point(size=2.5, pch=21) + 
       # geom_text(aes(label=Fold_change), size=3, nudge_x = 0.5, color="black") +
-      geom_line(size=0.6, aes(group=interaction(rep, transfer, salinity, strain))) +
+      geom_line(size=0.6, aes(group=interaction(rep, transfer, treatment, strain))) +
       labs(y="Relative fluorescence", x="Time (days)")
     
     if (length(wanted_facets) == 1) {
@@ -278,7 +278,7 @@ server <- function(input, output) {
         scale_y_continuous(trans="log") +
         facet_wrap(facets, ncol=n_col, scales="free_y") 
     }
-    pl <- pl + geom_label_repel(aes(label=transfer_start), color="black", data=filter(dd, salinity=="8 ppt", dayn==min(dayn)))
+    pl <- pl + geom_label_repel(aes(label=transfer_start), color="black", data=filter(dd, treatment=="8 ppt", dayn==min(dayn)))
     # pl <- ggplotly(pl)
     return(pl)
   })
@@ -299,13 +299,13 @@ server <- function(input, output) {
       # filter
       slopes_filtered <- slopes %>% 
         filter(zone %in% wanted_zones) %>% 
-        filter(salinity %in% wanted_treatments) %>% 
+        filter(treatment %in% wanted_treatments) %>% 
         filter(replicate %in% wanted_replicates) %>% 
         filter(transfer %in% wanted_transfers) %>% 
         mutate(replicate=paste("replicate", replicate)) %>% 
         mutate(transfer=paste("transfer", str_extract(transfer, regex("\\d"))))
       
-      ss <- ggplot(slopes_filtered, aes(x=salinity, y=estimate, color=salinity, shape=replicate)) +
+      ss <- ggplot(slopes_filtered, aes(x=treatment, y=estimate, color=treatment, shape=replicate)) +
         geom_hline(aes(yintercept=0), color="red", linetype=2) +
         geom_point(alpha=.8, size=2, stroke=1.5) +
         scale_shape_manual(values=21:23) +
@@ -347,7 +347,7 @@ server <- function(input, output) {
       
     slopes_filtered <- slopes %>%
       filter(zone %in% wanted_zones) %>%
-      filter(salinity %in% wanted_treatments) %>%
+      filter(treatment %in% wanted_treatments) %>%
       filter(replicate %in% wanted_replicates) %>%
       filter(transfer %in% wanted_transfers) %>%
       ungroup %>%
@@ -356,29 +356,29 @@ server <- function(input, output) {
     
     if (length(wanted_facets) == 1) {
       slopes_sum <- slopes_filtered %>% 
-        group_by(zone, strain, salinity) %>% 
+        group_by(zone, strain, treatment) %>% 
         summarise_at("estimate", funs(mean_slope=mean, sd_slope=sd)) 
     } else {
       if (wanted_facets[2] == "replicate") {
         slopes_sum <- slopes_filtered %>% 
-          group_by(zone, strain, salinity, replicate) %>% 
+          group_by(zone, strain, treatment, replicate) %>% 
           summarise_at("estimate", funs(mean_slope=mean, sd_slope=sd))
       } else if (wanted_facets[2] == "transfer") {
         slopes_sum <- slopes_filtered %>% 
-          group_by(zone, strain, salinity, transfer) %>% 
+          group_by(zone, strain, treatment, transfer) %>% 
           summarise_at("estimate", funs(mean_slope=mean, sd_slope=sd))
       } else {
         slopes_sum <- slopes_filtered %>% 
-          group_by(zone, strain, salinity) %>% 
+          group_by(zone, strain, treatment) %>% 
           summarise_at("estimate", funs(mean_slope=mean, sd_slope=sd))
       }
     }
     
-    ms <- ggplot(slopes_sum, aes(x=salinity, y=mean_slope, color=salinity)) +
+    ms <- ggplot(slopes_sum, aes(x=treatment, y=mean_slope, color=treatment)) +
       geom_hline(aes(yintercept=0), color="red", linetype=2) +
       geom_point(alpha=.8, size=2, stroke=1.5) +
-      # geom_crossbar(data=slopes_sum_filtered, aes(x=salinity, y=mean_slope, ymin=mean_slope-sd_slope, ymax=mean_slope+sd_slope, color=salinity), width=.4, alpha=.4) +
-      geom_errorbar(data=slopes_sum, aes(x=salinity, y=mean_slope, ymin=mean_slope-sd_slope, ymax=mean_slope+sd_slope, color=salinity), width=.1) +
+      # geom_crossbar(data=slopes_sum_filtered, aes(x=treatment, y=mean_slope, ymin=mean_slope-sd_slope, ymax=mean_slope+sd_slope, color=treatment), width=.4, alpha=.4) +
+      geom_errorbar(data=slopes_sum, aes(x=treatment, y=mean_slope, ymin=mean_slope-sd_slope, ymax=mean_slope+sd_slope, color=treatment), width=.1) +
       # scale_fill_viridis(end = 0.9, discrete = TRUE, option= "B") +
       scale_color_viridis(end = 0.9, discrete = TRUE, option= "B") +
       labs(y="Slope of log(RFU) by day", x="Salinity (ppt)")
