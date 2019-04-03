@@ -211,7 +211,7 @@ server <- function(input, output) {
   
   ##### --- data tab ------------------------------------------------- #####
   output$growth_data <- renderDataTable(
-    dd %>% select(-experiment, -plate_number, -rep, -dayn, -treatment) %>% 
+    dd %>% select(-experiment, -plate_number, -rep, -dayn) %>% 
       select(plate=plate_name, well, row, column, zone, strain, treatment, replicate, transfer, date, day, mean=Mean, sd=SD, median=Median, sum=Sum),
     options = list(pageLength = 10)
   )
